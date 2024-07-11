@@ -1,0 +1,53 @@
+
+{% extends "base.html"%}
+{% block head %}
+<head>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+{% endblock %}
+{% block content %}
+<div id="body_all_memes">
+    <div class="memes_action">
+        <div class="new_memes dd_imm">new_memes</div>
+        <div class="id_memes_panel dd_imm">
+            <div class="search_id">id input</div>
+            <div class="get_id_memes">get_id_memes</div>
+        </div>
+    </div>
+    <div class="content_area">
+        <h1>MEMES</h1>
+        <div class="content_area_dinamic">
+            <div class="content_card">
+                <p class="name">'name'</p>
+                <h5>#ID</h5>
+                <div class="content_">
+                    <div class="bb_deso"></div>
+                    <div class="content_image"><p></p></div>
+                    <div class="content_descript"><p>descript</p></div>
+                    <div class="bb_deso"></div>
+                    <div class="content_buttons action_btn">
+                        <div class="content_update"><p>update_button</p></div>
+                        <div class="content_search"><p>search_button</p></div>
+                    </div>
+                    <div class="bb_deso"></div>
+                </div>
+            </div>
+            <div class="content_card">
+                <p class="name">'name'</p>
+                <h5>#ID</h5>
+                <div class="content_">
+                    <div class="bb_deso"></div>
+                    <div class="content_image"><p></p></div>
+                    <div class="content_descript"><p>descript</p></div>
+                    <div class="bb_deso"></div>
+                    <div class="content_buttons action_btn">
+                        <div class="content_update"><p>update_button</p></div>
+                        <div class="content_search"><p>search_button</p></div>
+                    </div>
+                    <div class="bb_deso"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
