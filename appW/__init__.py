@@ -1,6 +1,6 @@
 from starlette.templating import Jinja2Templates
 
-from appW.bd.database import bd
+from appW.bd.methods import method
 
-bd = None
+bd = method()
 templates = Jinja2Templates(directory='appW/templates')
