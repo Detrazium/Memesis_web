@@ -1,11 +1,13 @@
-from sqlalchemy import Integer, String, Text, Column
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Integer, String, Text, Column, Table, MetaData
+from sqlalchemy.ext.declarative import declarative_base
 
+Base = declarative_base()
 
-class Base(DeclarativeBase): pass
-class Memes_model(Base):
-	__tablename__ = 'Mem_info'
-	id = Column(Integer, primary_key=True, index=True)
-	name = Column(String)
-	des_ = Column(Text)
-	Img_id = Column(Text)
+met = MetaData()
+Memes_model = Table(
+	'Mem_info', met,
+Column('id', Integer,autoincrement=True, primary_key=True, ),
+	 Column('name', String, nullable=False),
+	 Column('des_', Text, nullable=False),
+	 Column('Img_id', Text)
+					)

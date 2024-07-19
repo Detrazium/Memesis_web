@@ -12,7 +12,7 @@ dbI = db_conn()
 connI = dbI.engine
 
 sessionI = dbI.Session_db
-Table_memesI = Memes_model()
+Table_memesI = Memes_model
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
 	async with sessionI() as session:
