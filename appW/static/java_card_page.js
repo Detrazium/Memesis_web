@@ -20,11 +20,18 @@ newMbtn.addEventListener('click', function() {
     }
 });
 function Fgetter_area() {
+    const form = document.createElement('form');
+    form.setAttribute('class', 'Getter_area_memes');
+    form.setAttribute('id', 'Id_My_form');
+    form.setAttribute('method', 'post');
+    /*form.setAttribute('action', 'memes');*/
+
     const getter_area = document.createElement('div');
-    getter_area.setAttribute('class', 'Getter_area_memes');
     getter_area.setAttribute('id', 'inp_geter_area');
     getter_area.style.zIndex = '1000';
-    return getter_area;
+
+    form.appendChild(getter_area);
+    return form;
 }
 function add_memes_exit_btn() {
     const getter_exit = document.createElement('div');
@@ -51,6 +58,8 @@ function Fun_img_area() {
     img_inP.setAttribute('oninput', 'prewImage(this.files[0])')
     img_inP.setAttribute('accept', 'image/*');
     img_inP.setAttribute('type', 'file');
+    img_inP.setAttribute('name', 'Img_input')
+
     Image_item.setAttribute('id', 'img__');
 
     area_image.appendChild(Image_item);
@@ -61,10 +70,12 @@ function Fun_img_area() {
 function add_memes_action_area() {
     const getter_area = Fgetter_area()
     getter_exit = add_memes_exit_btn()
+
     const name_area = document.createElement('textarea');
     const img_area = Fun_img_area()
     const descr_area = document.createElement('textarea');
-    const create_button = document.createElement('div');
+    const create_button = document.createElement('input');
+
     const create_h2 = document.createElement('h2');
 
     create_h2.style.margin = '1%';
@@ -73,15 +84,20 @@ function add_memes_action_area() {
     name_area.setAttribute('class', 'getter_area_el');
     name_area.setAttribute('id', 'are_v1');
     name_area.setAttribute('placeholder', 'Name');
+    name_area.setAttribute('name', 'Name_areas');
 
     descr_area.setAttribute('class','getter_area_el are_V2');
-    descr_area.setAttribute('id', 'Id_new_descript')
+    descr_area.setAttribute('id', 'Id_new_descript');
+    descr_area.setAttribute('name', 'descriptionses');
     descr_area.setAttribute('placeholder', 'DESCRIPT');
     create_button.setAttribute('class', 'create_area clt');
-    create_button.setAttribute('id', '__btn_create')
+    create_button.setAttribute('id', '__btn_create');
+    create_button.setAttribute('type', 'submit');
+    create_button.setAttribute('value', 'submit');
 
     create_button.appendChild(create_h2);
     getter_area.appendChild(getter_exit);
+
     getter_area.appendChild(name_area);
     getter_area.appendChild(img_area);
     getter_area.appendChild(descr_area);
@@ -94,7 +110,8 @@ function add_memes_action_area() {
         body_memes.removeChild(getter_area);
         return;
     })
-    create_button.addEventListener('click', function(){
+    create_button.addEventListener('click', function(event){
+        event.preventDefault();
         const Name_new = document.getElementById('are_v1').value;
         const Img_new = document.getElementById('img__').src;
         const desc_new = document.getElementById('Id_new_descript').value;
@@ -107,6 +124,22 @@ function add_memes_action_area() {
         } else if (Img_new === '') {
             console.log(Img_new);
         }
+        var form_data = document.getElementById('Id_My_form');
+        var data = new FormData(form_data);
+        console.log(form_data);
+        fetch('memes', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'name': Name_new, 'image': 'imageSSS', 'descr': desc_new})
+        }).then(data => {
+                 document.getElementById("responseArea").innerHTML = data;
+              })
+              .catch(error => {
+                 console.error(error);
+                 });
         const Id='None'
         create_card_meme(Id, Name_new, Img_new, desc_new)
     })
@@ -174,7 +207,7 @@ function C_btn_up(){
     btn.setAttribute('class', 'btn_icon');
 
     const btn_up = document.createElement('img');
-    btn_up.setAttribute("src", 'http://localhost:8000/icons/update.ico')
+    btn_up.setAttribute("src", '/icons/update.ico')
     btn_up.setAttribute('class', 'btn_Img_');
 
     btn.appendChild(btn_up);
@@ -186,7 +219,7 @@ function C_btn_search(){
 
 
     const btn_search = document.createElement('img');
-    btn_search.setAttribute("src", 'http://localhost:8000/icons/select.ico')
+    btn_search.setAttribute("src", '/icons/select.ico')
     btn_search.setAttribute('class', 'btn_Img_');
     btn.appendChild(btn_search)
     return btn;
@@ -196,7 +229,7 @@ function C_btn_delete(){
     btn.setAttribute('class', 'btn_icon');
 
     const btn_delete = document.createElement('img');
-    btn_delete.setAttribute("src", 'http://localhost:8000/icons/delete.ico')
+    btn_delete.setAttribute("src", '/icons/delete.ico')
     btn_delete.setAttribute('class', 'btn_Img_');
 
     btn.appendChild(btn_delete);

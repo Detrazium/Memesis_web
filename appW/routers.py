@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Form
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from appW.bd.methods import method
@@ -16,7 +17,7 @@ async def get_all_memes(request: Request, session: AsyncSession = Depends(get_se
 	"""Получить список мемов"""
 	items = select(Table_memesI)
 	all_items = await session.execute(items)
-	return templates.TemplateResponse(name='all_memes.html', context={'request': request, 'db_data': all_items.all(), 'iconnn': 'appW/icon/update.ico'})
+	return templates.TemplateResponse(name='all_memes.html', context={'request': request, 'db_data': all_items.all()})
 
 @router.get('/memes/{id}')
 async def get_id_memes(id: int, request: Request, session: AsyncSession = Depends(get_session)):
@@ -25,10 +26,15 @@ async def get_id_memes(id: int, request: Request, session: AsyncSession = Depend
 	item = await session.execute(qwert)
 	return templates.TemplateResponse(name='all_memes.html', context={'request': request, "ID_MEMES": item})
 
-@router.post('/memes', response_class=HTMLResponse)
-async def new_mem(request: Request):
+class Item(BaseModel):
+	name: str
+	image: str
+	descr: str
+@router.post('/memes')
+async def new_mem(data: Item):
 	"""Добавить новый мем"""
-	return templates.TemplateResponse(name='all_memes.html', context={'request': request})
+	print('Input_itog: ', data)
+	return
 
 @router.put('/memes/{id}', response_class=HTMLResponse)
 async def update_mem(request: Request):
