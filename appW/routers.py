@@ -1,12 +1,19 @@
-from fastapi import APIRouter, Depends, Form
+import json
+import os
+import random
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, UploadFile, File, Body
+from fastapi.encoders import jsonable_encoder
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from appW.bd.methods import method
+from sqlalchemy import select, insert, update, delete
+from fastapi.responses import JSONResponse
+
 from appW import templates
-from appW.bd import get_session, Table_memesI
+from appW.bd import get_session, Table_memesI, Declar_Memes
+from appW.bd.schemas import Rat_files, WorkerInd, Rat_upp
 
 router = APIRouter(
 	prefix='/Operatro',
@@ -15,33 +22,108 @@ router = APIRouter(
 @router.get('/memes')
 async def get_all_memes(request: Request, session: AsyncSession = Depends(get_session)):
 	"""Получить список мемов"""
-	items = select(Table_memesI)
+	items = (select(Declar_Memes))
 	all_items = await session.execute(items)
-	return templates.TemplateResponse(name='all_memes.html', context={'request': request, 'db_data': all_items.all()})
+	itemir = all_items.scalars().all()
+	await session.commit()
+	result = [WorkerInd.model_validate(row, from_attributes=True) for row in itemir]
 
-@router.get('/memes/{id}')
-async def get_id_memes(id: int, request: Request, session: AsyncSession = Depends(get_session)):
+	list = {}
+	ll = {}
+	for ii, el in zip(range(len(result)), result):
+		for i in el:
+			ll[str(i[0])] = i[1]
+		ll2 = json.dumps(ll)
+		lll = json.loads(ll2)
+		list[str(ii)] = lll
+	i1 = json.dumps(list)
+	i2 = json.loads(i1)
+
+	return templates.TemplateResponse(name='all_memes.html', context={'request': request, 'db_data': i2})
+
+@router.get('/memes/{id_}')
+async def get_id_memes(id_: str, request: Request, session: AsyncSession = Depends(get_session)):
 	"""Получить конкретный мем"""
-	qwert = select(Table_memesI).where(Table_memesI.id == id)
+	qwert = select(Declar_Memes).where(Declar_Memes.id == int(id_))
 	item = await session.execute(qwert)
-	return templates.TemplateResponse(name='all_memes.html', context={'request': request, "ID_MEMES": item})
+	result = item.scalars()
+	await session.commit()
+	for el in result:
+		search = {1: el.id, 2:el.name, 3:el.des_, 4:el.Img_id}
+	return templates.TemplateResponse(name='init_meme.html',
+									  context={
+										  'request': request,
+										  'id': search[1],
+										  'name': search[2],
+										  'descr': search[3],
+										  'imgas': search[4]
+										  })
 
-class Item(BaseModel):
-	name: str
-	image: str
-	descr: str
 @router.post('/memes')
-async def new_mem(data: Item):
+async def new_mem(users_rev: Rat_files = Body(...), image: UploadFile = File(...), session: AsyncSession = Depends(get_session)):
 	"""Добавить новый мем"""
-	print('Input_itog: ', data)
-	return
+	img_data = await image.read()
+	ID_image = await name_fileD(users_rev.name)
 
-@router.put('/memes/{id}', response_class=HTMLResponse)
-async def update_mem(request: Request):
+	query = insert(Declar_Memes).values(
+		[{
+			'name': users_rev.name,
+			'des_': users_rev.descr,
+			'Img_id': ID_image
+		}])
+	itemsQuery = await session.execute(query)
+	itemsCommit = await session.commit()
+
+	SAVES = Path() / 'appW/images_static'
+	save_to = SAVES / ID_image
+	files_img = open(save_to, 'wb')
+	files_img.write(img_data)
+	files_img.close()
+	return {'filename Saved!': image.filename}
+
+@router.put('/memes/{id}')
+async def update_mem(id:str,
+					 users_rev: Rat_upp = Body(...),
+					 image: UploadFile = File(...),
+					 session: AsyncSession = Depends(get_session)):
 	"""Обновить существующий мем"""
-	return templates.TemplateResponse(name='all_memes.html', context={'request': request})
+	img_data = await image.read()
+	imgNAME = users_rev.imgDel.split('/')[-1]
 
-@router.delete('/memes/{id}', response_class=HTMLResponse)
-async def delete_mem(request: Request):
+	tbl = {
+			'name': users_rev.name,
+			'des_': users_rev.descr,
+		}
+	quert = update(Declar_Memes).where(Declar_Memes.id == int(id)).values(name=users_rev.name, des_=users_rev.descr)
+	comm = await session.execute(quert)
+	await session.commit()
+
+
+	SAVES = Path() / 'appW/images_static'
+	save_to = SAVES / imgNAME
+	files_img = open(save_to, 'wb')
+	files_img.write(img_data)
+	files_img.close()
+	return {'Update': 'Accept!'}
+
+@router.delete('/memes/{id}')
+async def delete_mem(id:str, session: AsyncSession = Depends(get_session)):
 	"""Удалить мем"""
-	return templates.TemplateResponse(name='all_memes.html', context={'request': request})
+
+	querter = select(Declar_Memes).where(Declar_Memes.id == int(id))
+	items = await session.execute(querter)
+	await session.commit()
+
+	imgdel = Path() / 'appW/images_static'
+	for el in items.scalars():
+		chs = el.Img_id
+	os.remove(f'{imgdel}/{chs}')
+
+	query = delete(Declar_Memes).where(Declar_Memes.id == int(id))
+	await session.execute(query)
+	await session.commit()
+	return {'Delete': 'comlete'}
+
+async def name_fileD(Named):
+	idimg = str(random.randint(1, 1000000))+"_"+str(Named[0:100])+'.jpg'
+	return idimg
