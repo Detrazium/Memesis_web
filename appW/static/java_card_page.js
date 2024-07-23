@@ -1,8 +1,35 @@
 const body_memes = document.getElementById('geter_area');
 const newMbtn = document.getElementById('btnNmem');
-const search_onId = document.getElementById('Id_pole_search');
 const search_odId_btn = document.getElementById('_getmemes');
 const cards_AREA = document.getElementById('CONTENT_CARDS_AREA')
+
+search_odId_btn.addEventListener('click', function() {
+    const search_onId = document.getElementById('Id_pole_search').value;
+    if (search_onId === '') {
+        location.reload(100);
+        return;
+    }
+    id_search_and_del_cards(search_onId);
+
+})
+
+function id_search_and_del_cards(search_onId) {
+    var Image_card__i__i = document.getElementById('#id_card__'+search_onId);
+    $('.content_area_dinamic').children().not('#id_card__'+search_onId).hide();
+    $('.content_area_dinamic').children('#id_card__'+search_onId).show();
+}
+
+function printer_cards_in_DB(db_data){
+    for (var  lister in db_data){
+        var jsonser = db_data[lister]
+        var id = jsonser['id']
+        var name = jsonser['name']
+        var des_ = jsonser['des_']
+        var Img_id = '/imGG/'+ jsonser['Img_id']
+        create_card_meme(id, name, Img_id, des_)
+        console.log('|create_init|')
+    }
+}
 
 function prewImage(file) {
     const reader = new FileReader();
@@ -27,11 +54,12 @@ function Fgetter_area() {
     /*form.setAttribute('action', 'memes');*/
 
     const getter_area = document.createElement('div');
+    getter_area.setAttribute('class', 'Getter_area_memes');
     getter_area.setAttribute('id', 'inp_geter_area');
     getter_area.style.zIndex = '1000';
 
     form.appendChild(getter_area);
-    return form;
+    return getter_area;
 }
 function add_memes_exit_btn() {
     const getter_exit = document.createElement('div');
@@ -42,12 +70,16 @@ function add_memes_exit_btn() {
     return getter_exit;
 
 }
-function Fun_img_area() {
+function Fun_img_area(Img_new_) {
     const img_area = document.createElement('div');
 
     const area_image = document.createElement('div');
     const img_inP = document.createElement('input');
     const Image_item = document.createElement('img');
+    if (Img_new_ != undefined) {
+        Image_item.src = Img_new_;
+    }
+
 
     img_area.setAttribute('class', 'getter_area_el padderImage');
 
@@ -56,9 +88,9 @@ function Fun_img_area() {
 
     img_inP.setAttribute('id', '__Image_input');
     img_inP.setAttribute('oninput', 'prewImage(this.files[0])')
-    img_inP.setAttribute('accept', 'image/*');
+    /*img_inP.setAttribute('accept', 'image/*');*/
     img_inP.setAttribute('type', 'file');
-    img_inP.setAttribute('name', 'Img_input')
+    img_inP.setAttribute('name', 'Img_input');
 
     Image_item.setAttribute('id', 'img__');
 
@@ -67,13 +99,28 @@ function Fun_img_area() {
     img_area.appendChild(area_image);
     return img_area;
 }
-function add_memes_action_area() {
+function add_memes_action_area(Id_, Name_new_, Img_new_, desc_new_) {
     const getter_area = Fgetter_area()
+    if (Id_ != undefined) {
+        const Id_upgraded = document.createElement('div');
+        Id_upgraded.setAttribute('id', 'id_upgraded')
+        const txtId = document.createElement('h3');
+        txtId.textContent = "Мем UPD// \nId:"+Id_;
+        Id_upgraded.appendChild(txtId);
+        getter_area.appendChild(Id_upgraded);
+    }
     getter_exit = add_memes_exit_btn()
 
     const name_area = document.createElement('textarea');
-    const img_area = Fun_img_area()
+    name_area.setAttribute('maxlength', '100');
+    if (Name_new_ != undefined) {
+        name_area.textContent = Name_new_;
+    }
+    const img_area = Fun_img_area(Img_new_)
     const descr_area = document.createElement('textarea');
+    if (desc_new_ != undefined) {
+        descr_area.textContent = desc_new_;
+    }
     const create_button = document.createElement('input');
 
     const create_h2 = document.createElement('h2');
@@ -122,32 +169,66 @@ function add_memes_action_area() {
             alert('Описание должно быть!');
             return;
         } else if (Img_new === '') {
-            console.log(Img_new);
+            alert('Изображение Пжалста!');
+            return;
         }
-        var form_data = document.getElementById('Id_My_form');
-        var data = new FormData(form_data);
-        console.log(form_data);
-        fetch('memes', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'name': Name_new, 'image': 'imageSSS', 'descr': desc_new})
-        }).then(data => {
-                 document.getElementById("responseArea").innerHTML = data;
-              })
-              .catch(error => {
-                 console.error(error);
-                 });
+        const FILE_IMG = document.getElementById('__Image_input');
+        if (FILE_IMG.files[0]) {
+            var datas = new FormData();
+            datas.append('users_rev',  JSON.stringify({'name': Name_new, 'descr': desc_new, 'imgDel': Img_new_}));
+            datas.append('image', FILE_IMG.files[0]);
+            if (Id_ != undefined){
+                console.log(Img_new_)
+                fetch('memes/' + Id_, {
+                    method:'PUT',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: datas
+                })
+                .then(resp => resp.text())
+                .then(data => {
+                document.getElementById('responseArea').innerHTML;
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+                alert('Мем Обновлён!')
+                location.reload();
+                return;
+            }
+
+            datas.append('users_rev',  JSON.stringify({'name': Name_new, 'descr': desc_new}));
+            datas.append('image', FILE_IMG.files[0]);
+            fetch('memes', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                body: datas
+            })
+            .then(resp => resp.text())
+            .then(data => {
+                document.getElementById('responseArea').innerHTML;
+            })
+            .catch(error => {
+                console.error(error);
+            })
+        } else {
+            alert('Изображение тоже должно быть обновлено!')
+            return;
+        }
         const Id='None'
         create_card_meme(Id, Name_new, Img_new, desc_new)
+        alert('Мем создан!')
+        location.reload()
     })
 }
 
-function C_card() {
+function C_card(id) {
     const card = document.createElement('div');
     card.setAttribute('class', 'content_card');
+    card.setAttribute('id', 'id_card__'+id)
     return card;
 }
 function C_name(Nm){
@@ -159,6 +240,7 @@ function C_name(Nm){
 function C_Id(id){
     const Id = document.createElement('h5');
     Id.textContent = '#ID: |>' + id;
+    Id.setAttribute('id', 'Id_Card__'+id)
     return Id;
 }
 function C_content(){
@@ -202,7 +284,7 @@ function C_buttons(){
     buttons.setAttribute('class', 'content_buttons');
     return buttons;
 }
-function C_btn_up(){
+function C_btn_up(id){
     const btn = document.createElement('button');
     btn.setAttribute('class', 'btn_icon');
 
@@ -213,7 +295,7 @@ function C_btn_up(){
     btn.appendChild(btn_up);
     return btn;
 }
-function C_btn_search(){
+function C_btn_search(Id_){
     const btn = document.createElement('button');
     btn.setAttribute('class', 'btn_icon');
 
@@ -222,7 +304,12 @@ function C_btn_search(){
     btn_search.setAttribute("src", '/icons/select.ico')
     btn_search.setAttribute('class', 'btn_Img_');
     btn.appendChild(btn_search)
-    return btn;
+
+    const btnhref = document.createElement('a');
+    btnhref.setAttribute('href', '/Operatro/memes/'+Id_)
+    btnhref.appendChild(btn)
+
+    return btnhref;
 }
 function C_btn_delete(){
     const btn = document.createElement('button');
@@ -236,7 +323,7 @@ function C_btn_delete(){
     return btn;
 }
 function create_card_meme(Id_, Name_new_, Img_new_, desc_new_) {
-    const card = C_card();
+    const card = C_card(Id_);
     const name = C_name(Name_new_);
     const Id = C_Id(Id_);
 
@@ -250,8 +337,8 @@ function create_card_meme(Id_, Name_new_, Img_new_, desc_new_) {
     const descript = C_descript(desc_new_);
     const buttons = C_buttons();
 
-    const btn_up = C_btn_up();
-    const btn_search = C_btn_search();
+    const btn_up = C_btn_up(Id_);
+    const btn_search = C_btn_search(Id_);
     const btn_delete = C_btn_delete();
 
     buttons.appendChild(btn_search);
@@ -269,4 +356,16 @@ function create_card_meme(Id_, Name_new_, Img_new_, desc_new_) {
     content.appendChild(__separator__3);
 
     cards_AREA.appendChild(card);
+
+    btn_up.addEventListener('click', function() {
+        add_memes_action_area(Id_, Name_new_, Img_new_, desc_new_)
+    })
+
+    btn_delete.addEventListener('click', function() {
+        alert('Карта удалена...');
+        cards_AREA.removeChild(card);
+        fetch('memes/'+Id_, {
+            method: 'DELETE'
+        })
+    })
 }

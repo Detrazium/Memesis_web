@@ -7,35 +7,24 @@
 {% endblock %}
 {% block content %}
 <div id = 'geter_area'>
+    <div id="responseArea"></div>
 </div>
 <div id="body_all_memes">
     <div class="memes_action" id="_memes_actions">
-        <div class="new_memes dd_imm" id="btnNmem">Create new memes</div>
+        <button class="new_memes dd_imm" id="btnNmem" style="padding:3px">Создать новый мем</button>
         <div class="id_memes_panel dd_imm">
-            <input class="search_id" id="Id_pole_search" placeholder="input Id search">
+            <input class="search_id" id="Id_pole_search" placeholder="Пустой для вывода всех">
         </div>
-        <button class="get_id_memes" id="_getmemes">get_id_memes</button>
+        <button class="get_id_memes" id="_getmemes" style="padding:3px">Искать по ID</button>
     </div>
     <div class="content_area">
         <h1>MEMES</h1>
         <div class="content_area_dinamic" id="CONTENT_CARDS_AREA">
-            <!--<div class="content_card">
-                <p class="name">'name'</p>
-                <h5>#ID</h5>
-                <div class="content_">
-                    <div class="bb_deso"></div>
-                    <div class="content_image"></div>
-                    <div class="content_descript"><p>descript</p></div>
-                    <div class="bb_deso"></div>
-                    <div class="content_buttons action_btn">
-                        <div class="content_update"><p>update_button</p></div>
-                        <div class="content_search"><p>search_button</p></div>
-                        <div class="content_detele"><p>delete_button</p></div>
-                    </div>
-                    <div class="bb_deso"></div>
-                </div>
-            </div>-->
         </div>
     </div>
 </div>
+<script src="{{ url_for('static', path='/java_card_pagination.js') }}"></script>
+<script src="{{ url_for('static', path='/java_card_page.js') }}"></script>
+<script type="text/javascript">var db_data = printer_cards_in_DB({{db_data|tojson}})</script>
+
 {% endblock %}
