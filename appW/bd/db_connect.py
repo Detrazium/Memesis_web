@@ -1,10 +1,9 @@
 import psycopg2
-# from sqlalchemy import create_async_engine
-from sqlalchemy import MetaData, Table, String, Integer, Column, Text, create_engine
+from sqlalchemy import create_engine
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from appW.bd.schemas import met, Base
+from appW.bd.schemas import Base
 
 class db_conn:
 	def __init__(self):
@@ -31,19 +30,22 @@ class create_db_tables():
 		self.creators()
 	def creators(self):
 		request = "postgresql+psycopg2://postgres:1111@localhost/memes_data"
-		self.engine = create_engine(request)
-		self.create_table()
+		print('[The database exists]')
 		try:
-			print('[connection is successful]')
+			self.engine = create_engine(request)
+			try:
+				self.create_table()
+			except:
+				print('Table status: YES')
 		except:
-			conn = psycopg2.connect(user='postgres', password='1111', )
+			conn = psycopg2.connect(user='postgres', password='1111')
 			conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 			cur = conn.cursor()
 			cur.execute('create database Memes_data')
 			conn.close()
 			self.creators()
 	def create_table(self):
-		Base.metadata.create_all(self.engine)
+		Base.metadata.tables["Mem_info"].create(self.engine)
 
 def main():
 	create_db_tables()

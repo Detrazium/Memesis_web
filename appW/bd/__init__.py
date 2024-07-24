@@ -9,7 +9,6 @@ connI = dbI.engine
 
 Declar_Memes = Table_MODEL
 sessionI = dbI.Session_db
-Table_memesI = Memes_model
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
 	async with sessionI() as session:
 		yield session

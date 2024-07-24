@@ -12,7 +12,7 @@ from sqlalchemy import select, insert, update, delete
 from fastapi.responses import JSONResponse
 
 from appW import templates
-from appW.bd import get_session, Table_memesI, Declar_Memes
+from appW.bd import get_session, Declar_Memes
 from appW.bd.schemas import Rat_files, WorkerInd, Rat_upp
 
 router = APIRouter(
