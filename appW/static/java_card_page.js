@@ -360,7 +360,6 @@ function create_card_meme(Id_, Name_new_, Img_new_, desc_new_) {
     btn_up.addEventListener('click', function() {
         add_memes_action_area(Id_, Name_new_, Img_new_, desc_new_)
     })
-
     btn_delete.addEventListener('click', function() {
         alert('Карта удалена...');
         cards_AREA.removeChild(card);

@@ -1,19 +1,22 @@
+import asyncio
 import json
 import os
 import random
 from pathlib import Path
 
+import nest_asyncio
 from fastapi import APIRouter, Depends, UploadFile, File, Body
-from fastapi.encoders import jsonable_encoder
 from fastapi.requests import Request
-from fastapi.responses import HTMLResponse
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update, delete
-from fastapi.responses import JSONResponse
 
 from appW import templates
 from appW.bd import get_session, Declar_Memes
+from appW.bd.db_MinIO import InpFile, DelFile
 from appW.bd.schemas import Rat_files, WorkerInd, Rat_upp
+
+nest_asyncio.apply()
 
 router = APIRouter(
 	prefix='/Operatro',
@@ -79,6 +82,11 @@ async def new_mem(users_rev: Rat_files = Body(...), image: UploadFile = File(...
 	files_img = open(save_to, 'wb')
 	files_img.write(img_data)
 	files_img.close()
+
+	pather = os.path.abspath(save_to)
+
+	await InpFile(ID_image, pather)
+	os.remove(pather)
 	return {'filename Saved!': image.filename}
 
 @router.put('/memes/{id}')
@@ -104,6 +112,7 @@ async def update_mem(id:str,
 	files_img = open(save_to, 'wb')
 	files_img.write(img_data)
 	files_img.close()
+	await InpFile(imgNAME)
 	return {'Update': 'Accept!'}
 
 @router.delete('/memes/{id}')
@@ -122,6 +131,9 @@ async def delete_mem(id:str, session: AsyncSession = Depends(get_session)):
 	query = delete(Declar_Memes).where(Declar_Memes.id == int(id))
 	await session.execute(query)
 	await session.commit()
+	await DelFile(chs)
+
+
 	return {'Delete': 'comlete'}
 
 async def name_fileD(Named):
