@@ -1,22 +1,21 @@
-import asyncio
+"""
+Основные Routers проекта, вынесенные в отдельный файл
+
+"""
+
 import json
 import os
 import random
 from pathlib import Path
-
-import nest_asyncio
 from fastapi import APIRouter, Depends, UploadFile, File, Body
 from fastapi.requests import Request
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update, delete
-
 from appW import templates
 from appW.bd import get_session, Declar_Memes
 from appW.bd.db_MinIO import InpFile, DelFile
 from appW.bd.schemas import Rat_files, WorkerInd, Rat_upp
 
-nest_asyncio.apply()
 
 router = APIRouter(
 	prefix='/Operatro',
@@ -24,7 +23,10 @@ router = APIRouter(
 )
 @router.get('/memes')
 async def get_all_memes(request: Request, session: AsyncSession = Depends(get_session)):
-	"""Получить список мемов"""
+	"""
+	Доменная страница проекта
+	Получить список мемов
+	"""
 	items = (select(Declar_Memes))
 	all_items = await session.execute(items)
 	itemir = all_items.scalars().all()
@@ -46,7 +48,10 @@ async def get_all_memes(request: Request, session: AsyncSession = Depends(get_se
 
 @router.get('/memes/{id_}')
 async def get_id_memes(id_: str, request: Request, session: AsyncSession = Depends(get_session)):
-	"""Получить конкретный мем"""
+	"""
+	Открывает страницу с отдельным мемом в полном развороте
+	Получить конкретный мем
+	"""
 	qwert = select(Declar_Memes).where(Declar_Memes.id == int(id_))
 	item = await session.execute(qwert)
 	result = item.scalars()
@@ -137,5 +142,6 @@ async def delete_mem(id:str, session: AsyncSession = Depends(get_session)):
 	return {'Delete': 'comlete'}
 
 async def name_fileD(Named):
+	"""Генератор случайной метки изображений"""
 	idimg = str(random.randint(1, 1000000))+"_"+str(Named[0:100])+'.jpg'
 	return idimg

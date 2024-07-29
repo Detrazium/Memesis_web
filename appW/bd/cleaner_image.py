@@ -1,7 +1,8 @@
+"""
+Функция удаления фотографий из временной папки при отключении проекта
+"""
 import os
 import shutil
-
-
 def Del_ImgStart():
     folder = 'appW/images_static'
     for files in os.listdir(folder):

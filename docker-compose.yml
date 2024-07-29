@@ -1,0 +1,55 @@
+version: "2.29.0"
+services:
+  db:
+    image: postgres:16.3
+    container_name: db_app_postgres
+    command: -p 5432
+    expose:
+      - 5432
+    env_file:
+      - .env-non-db
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    container_name: minio_contain_server
+    volumes:
+      - .minio/data:/data
+      - .minio/config:/root/.minio/
+    environment:
+      MINIO_ACCESS_KEY: "Detraz"
+      MINIO_SECRET_KEY: "ASDFGHASDFGH"
+    command: server /data --address :9000 --console-address :9001
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 1s
+    restart: always
+
+  createBucket:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    network_mode: service:minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://localhost:9000 Detraz ASDFGHASDFGH;
+      /usr/bin/mc mb myminio/python-bucket --ignore-existing;
+      /usr/bin/mc anonymous set public myminio/python-bucket;
+      "
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .env-non-db
+    container_name: app_fastApi
+    ports:
+      - 9988:8000
+    depends_on:
+      - db
+      - minio
+      - createBucket

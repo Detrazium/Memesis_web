@@ -1,11 +1,16 @@
-import json
+"""
+Pydantic схемы для проверки и валидации данных
+"""
 
+
+import json
 from pydantic import BaseModel, model_validator
 from sqlalchemy import Integer, String, Text, Column, Table, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 class Table_MODEL(Base):
+	"""Основная модель таблицы"""
 	__tablename__ = 'Mem_info'
 	id = Column(Integer, primary_key=True, autoincrement=True)
 	name = Column(String, nullable=False)

@@ -1,3 +1,9 @@
+"""
+
+Файл проверок на наличие в Postgresql нужной базы данных и таблицы, он же раздает файл сессии
+
+"""
+
 import psycopg2
 from sqlalchemy import create_engine
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -6,45 +12,49 @@ from sqlalchemy.orm import sessionmaker
 from appW.bd.schemas import Base
 
 class db_conn:
+	"""
+	Ассинхронное подключение к Postgresql
+	"""
 	def __init__(self):
 		self.create_enginers()
 	def create_enginers(self):
-		request = "postgresql+asyncpg://postgres:1111@localhost/memes_data"
+		"""Функция подключения"""
+		request = "postgresql+asyncpg://postgres:postgres@db:5432/memes_data"
+		# try:
 		self.engine = create_async_engine(request)
-		self.engine.connect()
 		self.get_session()
-		try:
-			print('[connection is successful]')
-		except:
-			conn = psycopg2.connect(user='postgres', password='1111', )
-			conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-			cur = conn.cursor()
-			cur.execute('create database Memes_data')
-			conn.close()
-			self.create_enginers()
+		print('[connection is successful]')
 	def get_session(self):
+		"""Раздача сессии"""
 		self.Session_db = sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
 class create_db_tables():
+	"""Синхронное создание базы данных и таблицы"""
 	def __init__(self):
 		self.creators()
 	def creators(self):
-		request = "postgresql+psycopg2://postgres:1111@localhost/memes_data"
-		print('[The database exists]')
+		"""Синхронное подключение к Postgresql для создания таблицы и базы данных, с проверкой на наличие и того и другого"""
+		conn = psycopg2.connect(user='postgres', password='postgres', host='db')
+		conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+		cur = conn.cursor()
 		try:
-			self.engine = create_engine(request)
-			try:
-				self.create_table()
-			except:
-				print('Table status: YES')
-		except:
-			conn = psycopg2.connect(user='postgres', password='1111')
-			conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-			cur = conn.cursor()
 			cur.execute('create database Memes_data')
-			conn.close()
 			self.creators()
+		except:
+			print('[The database exists]')
+		conn.close()
+
+		# ||||||||||||
+
+		request = "postgresql+psycopg2://postgres:postgres@db:5432/memes_data"
+		self.engine = create_engine(request)
+		try:
+			self.create_table()
+		except:
+			print('Table status: YES')
 	def create_table(self):
+		"""Создание таблицы"""
+		print('Table_create...')
 		Base.metadata.tables["Mem_info"].create(self.engine)
 
 def main():
