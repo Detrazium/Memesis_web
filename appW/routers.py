@@ -117,7 +117,8 @@ async def update_mem(id:str,
 	files_img = open(save_to, 'wb')
 	files_img.write(img_data)
 	files_img.close()
-	await InpFile(imgNAME)
+	pather = os.path.abspath(save_to)
+	await InpFile(imgNAME, pather)
 	return {'Update': 'Accept!'}
 
 @router.delete('/memes/{id}')
